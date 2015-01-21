@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Client Monkey 1</title>
+    <script type="text/javascript" src="//static.twilio.com/libs/twiliojs/1.2/twilio.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+    </script>
+    <link href="//static0.twilio.com/packages/quickstart/client.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript">
+      /* Create the Client with a Capability Token */
+      Twilio.Device.setup("<%= token %>", {debug: true});
+      /* Let us know when the client is ready. */
+      Twilio.Device.ready(function (device) {
+        $("#log").text("Client '<%= client_name %>' is ready");
+      });
+      /* Report any errors on the screen */
+      Twilio.Device.error(function (error) {
+        $("#log").text("Error: " + error.message);
+      });
+      Twilio.Device.connect(function (conn) {
+        $("#log").text("Successfully established call");
+      });
+      /* Log a message when a call disconnects. */
+      Twilio.Device.disconnect(function (conn) {
+        $("#log").text("Call ended");
+      });
+      /* Listen for incoming connections */
+      Twilio.Device.incoming(function (conn) {
+        $("#log").text("Incoming connection from " + conn.parameters.From);
+        // accept the incoming connection and start two-way audio
+        conn.accept();
+      });
+      Twilio.Device.presence(function (pres) {
+        if (pres.available) {
+          // create an item for the client that became available
+          $("<li>", {id: pres.from, text: pres.from}).click(function () {
+            $("#number").val(pres.from);
+            call();
+          }).prependTo("#people");
+        }
+        else {
+          // find the item by client name and remove it
+          $("#" + pres.from).remove();
+        }
+      });
+      /* Connect to Twilio when we call this function. */
+      function call() {
+        Twilio.Device.connect();
+      }
+      function call() {
+        // get the phone number to connect the call to
+        params = {"PhoneNumber": $("#number").val()};
+        Twilio.Device.connect(params);
+      }
+      /* A function to end a connection to Twilio. */
+      function hangup() {
+        Twilio.Device.disconnectAll();
+      }
+    </script>
+  </head>
+  <body>
+    <button class="call" onclick="call();">Call</button>
+
+    <!-- use an onclick action to hang up the call when the user presses
+    the button -->
+    <button class="hangup" onclick="hangup();">Hangup</button>
+
+    <input type="text" id="number" name="number" placeholder="Enter a phone number to call"/>
+
+    <div id="log">Loading pigeons...</div>
+
+    <ul id="people"/>
+  </body>
+</html>
